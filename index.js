@@ -28,6 +28,13 @@ io.on('connection', function(socket){
     // Send to all connected clients
     io.emit('newUser',userName);
   });
+  socket.on('setChannelValue',function(channelId,channelValue){
+    console.log("channelId: "+channelId);
+    console.log("channelValue: "+ channelValue);
+
+    // Send to master view
+    io.emit('setChannelValue',channelId,channelValue);
+  })
 });
 
 http.listen(3000, function(){
