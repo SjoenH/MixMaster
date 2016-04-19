@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Host</title>
+  </head>
+  <body>
+    <h1>Host</h1>
+
+      <form id="channel" action="">
+        Channel Name:<br>
+        <input id="newChannel" autocomplete="off"/><button>Add Channel</button>
+      </form>
+
+    <h2>Clients</h2>
+    <ol id="clients">
+      <!-- List of connected clients with fadervalues. -->
+    </ol>
+    <h2>Channels</h2>
+    <ol id="myFaders">
+      <!-- List of faders that control My Monitor Mix -->
+    </ol>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      var socket = io();
+      // Add client to list
+      var clientList = document.getElementById('clients');
+      socket.on('newUser',function(name){
+        var entry = document.createElement('li');
+        var userLabel = document.createTextNode(name);
+        entry.appendChild(userLabel);
+        clientList.appendChild(entry);
+      })
+
+      // Add slider/faders live
+          var channelList = document.getElementById('myFaders');
+          socket.on('newChannel', function(channelName){
+            var entry = document.createElement('li');
+            var x = document.createElement("INPUT");
+            var t = document.createTextNode(channelName);
+            x.setAttribute("type", "range");
+            x.value="0";
+            x.id=channelName;
+
+            entry.appendChild(x);
+            entry.appendChild(t);
+            channelList.appendChild(entry);
+          });
+
+      // Listen for form action
+      $('form').submit(function(){
+        socket.emit('newChannel', $('#newChannel').val());
+        $('#newChannel').val('');
+        return false;
+      });
+
+    </script>
+  </body>
+</html>
