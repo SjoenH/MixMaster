@@ -46,6 +46,12 @@
             entry.appendChild(x);
             entry.appendChild(t);
             list.appendChild(entry);
+
+            var channelId = '#'+channelName;
+            $(channelId).on("input change", function() {
+              var channelValue = document.getElementById(channelName).value;
+              socket.emit('setChannelValue',channelName,channelValue);
+             });
           });
 
       // Listen for form action

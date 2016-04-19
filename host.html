@@ -19,6 +19,9 @@
     <ol id="myFaders">
       <!-- List of faders that control My Monitor Mix -->
     </ol>
+
+    <button type="button" name="button">OK</button>
+
     <script src="/socket.io/socket.io.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
@@ -45,6 +48,13 @@
             entry.appendChild(x);
             entry.appendChild(t);
             channelList.appendChild(entry);
+          });
+
+          // Update Faders live to client values
+          socket.on('setChannelValue',function(channelId,channelValue){
+            console.log(channelId);
+            var fader = document.getElementById(channelId);
+            fader.value = channelValue;
           });
 
       // Listen for form action
