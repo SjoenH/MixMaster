@@ -5,57 +5,130 @@
   </head>
   <body>
     <h1>Host</h1>
-
-      <form id="channel" action="">
-        Channel Name:<br>
-        <input id="newChannel" autocomplete="off"/><button>Add Channel</button>
-      </form>
-
-    <h2>Clients</h2>
-    <ol id="clients">
-      <!-- List of connected clients with fadervalues. -->
-    </ol>
-    <h2>Channels</h2>
+    <content>
+      <b>Room Name: </b> Not yet implemented
+      <b>Your Name: </b> Not yet implemented
+      <b>Role: </b> Technician
+    </content>
+    <h2>Master view</h2>
     <ol id="myFaders">
       <!-- List of faders that control My Monitor Mix -->
     </ol>
 
-    <button type="button" name="button">OK</button>
+      <form id="channel" action="">
+        <input id="newChannel" autocomplete="off"/><button>Add Channel</button>
+      </form>
+
+      <content id="views">
+        <h2>Views</h2>    <button onclick=rogerThat()>Roger That!</button>
+
+        <!-- List all views in this box -->
+      </content>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
       var socket = io();
-      // Add client to list
-      var clientList = document.getElementById('clients');
-      socket.on('newUser',function(name){
-        var entry = document.createElement('li');
-        var userLabel = document.createTextNode(name);
-        entry.appendChild(userLabel);
-        clientList.appendChild(entry);
-      })
+      socket.emit('userSendsID',"admin");
+
+      var channelViewList = [];
+
+      function addChannelView(name) {
+        var newContent = document.createElement('content');
+        newContent.id = name;
+        var header = document.createTextNode(name);
+        newContent.appendChild(header);
+        // document.body.appendChild(newContent);
+        var element = document.getElementById('views');
+        element.appendChild(newContent);
+        //add to channelViewList so that we easily can list all views in code
+        channelViewList.push(name);
+      }
+
+      var myChannels =[]
+      //initial sync reciever
+      socket.on('allChannels',function(allChannels){
+        console.log(allChannels);
+        //add all recieved channels to list.
+        myChannels = allChannels;
+        for (var i = 0; i < myChannels.length; i++) {
+          //add all recieved channels to view.
+          addChannelToView(myChannels[i],'myFaders');
+        }
+      });
+
+      //add channel to View with change-listener activated
+      function addChannelToView(channelName,view) {
+        var list = document.getElementById(view);
+          var entry = document.createElement('div');
+          entry.setAttribute('id',view+'.'+channelName);
+          var x = document.createElement("INPUT");
+          var t = document.createTextNode(channelName);
+          x.setAttribute("type", "range");
+          x.value="0";
+          x.id=channelName+view;
+
+          entry.appendChild(x);
+          entry.appendChild(t);
+          //
+        };
 
       // Add slider/faders live
-          var channelList = document.getElementById('myFaders');
-          socket.on('newChannel', function(channelName){
-            var entry = document.createElement('li');
-            var x = document.createElement("INPUT");
-            var t = document.createTextNode(channelName);
-            x.setAttribute("type", "range");
-            x.value="0";
-            x.id=channelName;
+      socket.on('newChannel', function(channelName){
+        var entry = document.createElement('li');
+        var x = document.createElement("INPUT");
+        var t = document.createTextNode(channelName);
+        x.setAttribute("type", "range");
+        x.value="0";
 
-            entry.appendChild(x);
-            entry.appendChild(t);
-            channelList.appendChild(entry);
-          });
+        entry.appendChild(x);
+        entry.appendChild(t);
+        document.getElementById('myFaders').appendChild(entry);
+        //Add to all views
+        for (var i = 0; i < channelViewList.length; i++) {
+          console.log(i);
+          console.log("channelViewList[i] = ",channelViewList[i]);
+          console.log(document.getElementById(channelViewList[i]));
 
-          // Update Faders live to client values
-          socket.on('setChannelValue',function(channelId,channelValue){
-            console.log(channelId);
-            var fader = document.getElementById(channelId);
-            fader.value = channelValue;
-          });
+          addChannelToView(channelName,channelViewList[i]);
+        };
+      });
+
+      socket.on('newUser',function(channelList,userName){
+        addChannelView(userName);
+        for (var i = 0; i < channelList.length; i++) {
+          addChannelToView(channelList[i],userName);
+        };
+      });
+
+      var redThings = [];
+      var alert = false;
+      function rogerThat() {
+          alert = false;
+          // console.log("alert = ",alert);
+          // document.body.style.backgroundColor = "white";
+          for (var i = 0; i < redThings.length; i++) {
+            redThings[i].style.backgroundColor = 'white';
+          }
+      }
+
+      // Update Faders live to client values
+      socket.on('setChannelValue',function(userName,channelId,channelValue){
+        console.log(userName," changed the value for ",channelId," to ",channelValue);
+        var fader = document.getElementById(channelId+userName);
+//Kickoauth aka. channelName + userName
+        fader.value = channelValue;
+        fader.style.backgroundColor = "red";
+
+        //set alert to true
+        alert = true;
+        // console.log("alert = ",alert);
+        //add a visual que of the change for the admin to see
+        var element = document.getElementById(channelId+userName).parentNode
+        element.style.backgroundColor = 'red';
+        //add element to list so we can remove it later
+        redThings.push(element);
+      });
 
       // Listen for form action
       $('form').submit(function(){
@@ -63,7 +136,6 @@
         $('#newChannel').val('');
         return false;
       });
-
     </script>
   </body>
 </html>

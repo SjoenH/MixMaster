@@ -5,61 +5,56 @@
   </head>
   <body>
     <h1>Client</h1>
-      <form action="">
-        Your name:<br>
-        <input id="newChannel" autocomplete="off"/><button>Connect</button>
-      </form>
-
-    <h2>Clients</h2>
-    <ol id="clients">
-      <!-- List of connected clients with fadervalues. -->
-    </ol>
-
     <h2>Channels</h2>
     <ol id="myFaders">
       <!-- List of faders that control My Monitor Mix -->
     </ol>
-
     <script src="/socket.io/socket.io.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
       var socket = io();
-      // Add client to list
-      var clientList = document.getElementById('clients');
-      socket.on('newUser',function(name){
-        var entry = document.createElement('li');
-        var userLabel = document.createTextNode(name);
-        entry.appendChild(userLabel);
-        clientList.appendChild(entry);
-      })
+      var myID = prompt("Please enter your name", "Harry Potter");
+      console.log(myID);
+      socket.emit('userSendsID',myID);
+
+      var myChannels =[]
+      //initial sync reciever
+      socket.on('allChannels',function(allChannels){
+        console.log(allChannels);
+        //add all recieved channels to list.
+        myChannels = allChannels;
+        for (var i = 0; i < myChannels.length; i++) {
+          //add all recieved channels to view.
+          addChannelToView(myChannels[i]);
+        }
+      });
+      //add channel to View with change-listener activated
+      function addChannelToView(channelName) {
+        var list = document.getElementById('myFaders');
+          var entry = document.createElement('li');
+          var x = document.createElement("INPUT");
+          var t = document.createTextNode(channelName);
+          x.setAttribute("type", "range");
+          x.value="0";
+          x.id=channelName;
+
+          entry.appendChild(x);
+          entry.appendChild(t);
+          list.appendChild(entry);
+
+          //add change-event-listener
+          var channelId = '#'+channelName;
+          $(channelId).on("input change", function() {
+            var channelValue = document.getElementById(channelName).value;
+            socket.emit('setChannelValue',myID,channelName,channelValue);
+           });
+        };
 
       // Add slider/faders live
           var list = document.getElementById('myFaders');
           socket.on('newChannel', function(channelName){
-            var entry = document.createElement('li');
-            var x = document.createElement("INPUT");
-            var t = document.createTextNode(channelName);
-            x.setAttribute("type", "range");
-            x.value="0";
-            x.id=channelName;
-
-            entry.appendChild(x);
-            entry.appendChild(t);
-            list.appendChild(entry);
-
-            var channelId = '#'+channelName;
-            $(channelId).on("input change", function() {
-              var channelValue = document.getElementById(channelName).value;
-              socket.emit('setChannelValue',channelName,channelValue);
-             });
+            addChannelToView(channelName);
           });
-
-      // Listen for form action
-      $('form').submit(function(){
-        socket.emit('newUser', $('#newChannel').val());
-        // $('#newChannel').val('');
-        return false;
-      });
 
     </script>
   </body>
