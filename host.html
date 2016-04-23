@@ -5,11 +5,6 @@
   </head>
   <body>
     <h1>Host</h1>
-    <content>
-      <b>Room Name: </b> Not yet implemented
-      <b>Your Name: </b> Not yet implemented
-      <b>Role: </b> Technician
-    </content>
     <h2>Master view</h2>
     <ol id="myFaders">
       <!-- List of faders that control My Monitor Mix -->
@@ -68,9 +63,18 @@
           x.value="0";
           x.id=channelName+view;
 
+        //  list.innerHTML = '<form oninput="amount.value="channelName+view".value"><input type="range" id=channelName+view name=channelName+view min="0" max="100"><output name="amount" for=channelName+view>0</output></form>'
+
           entry.appendChild(x);
           entry.appendChild(t);
+          // entry.appendChild(value);
+          // entry.appendChild(change);
           //
+          // var btn = document.createElement("BUTTON");        // Create a <button> element
+          // // var t = document.createTextNode("CLICK ME");       // Create a text node
+          // btn.appendChild(t);                                // Append the text to <button>
+          // entry.appendChild(btn);                    // Append <button> to <body>
+          list.appendChild(entry);
         };
 
       // Add slider/faders live
