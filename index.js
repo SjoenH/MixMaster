@@ -46,8 +46,10 @@ io.on('connection', function(socket){
         //send new user to host
         io.emit('newUser',channelList,userID);
       }else {
-        //send the users existing channels
+        //TODO: send the users existing channels
         console.log("User already exists!");
+        // Temporarily sending this:
+        socket.emit('allChannels',channelList);
       };
       console.log("clientList.length: ",clientList.length);
     };

@@ -2,42 +2,6 @@
 <html>
   <head>
     <title>Host</title>
-    <style>
-      table {
-        width:100%;
-      }
-      table, th, td {
-        border: 1px solid black;
-        border-collapse: collapse;
-      }
-      th, td {
-        padding: 5px;
-        text-align: left;
-      }
-      table#myTable tr:nth-child(even) {
-        background-color: #eee;
-      }
-      table#myTable tr:nth-child(odd) {
-       background-color:#fff;
-      }
-      table#myTable th	{
-        background-color: black;
-        color: white;
-      }
-    </style>
-    <script>
-    function insUserRow(userName) {
-      var x = document.getElementById(myTable).insertRow(0);
-      var y = x.insertCell(0);
-      var z = x.insertCell(1);
-      y.innerHTML = z.innerHTML = userName;
-    }
-    // function insertChannelColumn(id) {
-    //   var x = document.getElementById(id);
-    //   y = x.insertCell(0);
-    //   y.innerHTML = "New Channel";
-    // }
-    </script>
   </head>
   <body>
     <h1>Host</h1>
@@ -46,23 +10,7 @@
       <b>Your Name: </b> Not yet implemented
       <b>Role: </b> Technician
     </content>
-    <content>
-      <table id="myTable">
-      <tr>
-        <td>Name</td>
-      </tr>
-      <tr>
-
-      </tr>
-      </table>
-    </content>
-    <input type="button" onclick="insUserRow('Henry')" value="insUserRow">
-    <!-- <input type="button" onclick="insertChannelColumn('myTable')" value="insertChannelColumn"> -->
-    <h2>Clients</h2>
-    <ol id="clients">
-      <!-- List of connected clients with fadervalues. -->
-    </ol>
-    <h2>Channels</h2>
+    <h2>Master view</h2>
     <ol id="myFaders">
       <!-- List of faders that control My Monitor Mix -->
     </ol>
@@ -72,12 +20,10 @@
       </form>
 
       <content id="views">
-        <h2>Views</h2>
+        <h2>Views</h2>    <button onclick=rogerThat()>Roger That!</button>
+
         <!-- List all views in this box -->
-
       </content>
-
-    <button type="button" name="button">OK</button>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
@@ -92,7 +38,9 @@
         newContent.id = name;
         var header = document.createTextNode(name);
         newContent.appendChild(header);
-        document.body.appendChild(newContent);
+        // document.body.appendChild(newContent);
+        var element = document.getElementById('views');
+        element.appendChild(newContent);
         //add to channelViewList so that we easily can list all views in code
         channelViewList.push(name);
       }
@@ -108,10 +56,12 @@
           addChannelToView(myChannels[i],'myFaders');
         }
       });
+
       //add channel to View with change-listener activated
       function addChannelToView(channelName,view) {
         var list = document.getElementById(view);
-          var entry = document.createElement('li');
+          var entry = document.createElement('div');
+          entry.setAttribute('id',view+'.'+channelName);
           var x = document.createElement("INPUT");
           var t = document.createTextNode(channelName);
           x.setAttribute("type", "range");
@@ -120,24 +70,8 @@
 
           entry.appendChild(x);
           entry.appendChild(t);
-          list.appendChild(entry);
           //
-          // //add change-event-listener
-          // var channelId = '#'+channelName;
-          // $(channelId).on("input change", function() {
-          //   var channelValue = document.getElementById(channelName).value;
-          //   socket.emit('setChannelValue',channelName,channelValue);
-          //  });
         };
-
-      // // Add client to list
-      // var clientList = document.getElementById('clients');
-      // socket.on('newUser',function(name){
-      //   var entry = document.createElement('li');
-      //   var userLabel = document.createTextNode(name);
-      //   entry.appendChild(userLabel);
-      //   clientList.appendChild(entry);
-      // });
 
       // Add slider/faders live
       socket.on('newChannel', function(channelName){
@@ -146,7 +80,6 @@
         var t = document.createTextNode(channelName);
         x.setAttribute("type", "range");
         x.value="0";
-        x.id=channelName;
 
         entry.appendChild(x);
         entry.appendChild(t);
@@ -168,12 +101,33 @@
         };
       });
 
+      var redThings = [];
+      var alert = false;
+      function rogerThat() {
+          alert = false;
+          // console.log("alert = ",alert);
+          // document.body.style.backgroundColor = "white";
+          for (var i = 0; i < redThings.length; i++) {
+            redThings[i].style.backgroundColor = 'white';
+          }
+      }
+
       // Update Faders live to client values
       socket.on('setChannelValue',function(userName,channelId,channelValue){
         console.log(userName," changed the value for ",channelId," to ",channelValue);
-        var view = userName+"View";
         var fader = document.getElementById(channelId+userName);
+//Kickoauth aka. channelName + userName
         fader.value = channelValue;
+        fader.style.backgroundColor = "red";
+
+        //set alert to true
+        alert = true;
+        // console.log("alert = ",alert);
+        //add a visual que of the change for the admin to see
+        var element = document.getElementById(channelId+userName).parentNode
+        element.style.backgroundColor = 'red';
+        //add element to list so we can remove it later
+        redThings.push(element);
       });
 
       // Listen for form action
@@ -182,7 +136,6 @@
         $('#newChannel').val('');
         return false;
       });
-
     </script>
   </body>
 </html>

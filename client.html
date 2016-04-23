@@ -5,27 +5,10 @@
   </head>
   <body>
     <h1>Client</h1>
-    <content>
-      <b>Room Name: </b> Not yet implemented
-      <b>Your Name: </b> Not yet implemented
-      <b>Role: </b> Not yet implemented
-    </content>
-
-      <!-- <form action="">
-        Your name:<br>
-        <input id="newChannel" autocomplete="off"/><button>Connect</button>
-      </form> -->
-
-    <h2>Clients</h2>
-    <ol id="clients">
-      <!-- List of connected clients with fadervalues. -->
-    </ol>
-
     <h2>Channels</h2>
     <ol id="myFaders">
       <!-- List of faders that control My Monitor Mix -->
     </ol>
-
     <script src="/socket.io/socket.io.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
@@ -67,28 +50,11 @@
            });
         };
 
-
-      // Add client to list
-      var clientList = document.getElementById('clients');
-      socket.on('newUser',function(name){
-        var entry = document.createElement('li');
-        var userLabel = document.createTextNode(name);
-        entry.appendChild(userLabel);
-        clientList.appendChild(entry);
-      });
-
       // Add slider/faders live
           var list = document.getElementById('myFaders');
           socket.on('newChannel', function(channelName){
             addChannelToView(channelName);
           });
-
-      // Listen for form action
-      // $('form').submit(function(){
-      //   socket.emit('newUser', $('#newChannel').val());
-      //   // $('#newChannel').val('');
-      //   return false;
-      // });
 
     </script>
   </body>
