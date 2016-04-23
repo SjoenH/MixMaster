@@ -8,7 +8,7 @@ var userObjects = [];
 
 var dev = true;
 if (dev) {
-  channelList = ["Daniel","Anna",'Piano','Akk Gitar','El Gitar','Bass','Kick','Snare','Hi-hat'];
+  channelList = ["Daniel","Anna",'Piano','Akk Gitar','El Gitar','Bass','SynthBass','Kick','Snare','Hi-hat'];
 }
 // for (var i = 0; i < demoChannels.length; i++) {
 //    socket.emit('newChannel',demoChannels[i]);
